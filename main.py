@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from langchain import hub
-from langchain.agents import AgentExecutor
+from langchain.agents import AgentExecutor, initialize_agent
+from langchain.tools import Tool
 from langchain.agents.agent_types import AgentType
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 from langchain_experimental.tools import PythonREPLTool
@@ -39,8 +40,28 @@ def main():
     )
 
     # query = "which writer wrote the most episodes in episode-info.csv? how many episodes did he write"
-    query = "print season ascending order of the number of episodes"
-    csv_agent.run(query)
+    # query = "print season ascending order of the number of episodes"
+    # csv_agent.run(query)
+
+    grand_agent = initialize_agent(tools=[
+        Tool(
+            name="PythonAgent",
+            func=agent_executor.run,
+            description="""useful when you need to transform natural language and want to 
+            execute python code to answer questions. Don't send your code to your agent.""",
+        ),
+        Tool(
+            name="CSVAgent",
+            func=csv_agent.run,
+            description="useful when you need to answer questions over a csv file. Uses pandas to compute"
+        ),
+    ],
+        llm=llm,
+        agent_type=AgentType.OPENAI_FUNCTIONS,
+        verbose=True
+    )
+
+    grand_agent.run("""which writer wrote the most episodes in episode-info.csv? how many episodes did he write""")
 
 
 if __name__ == '__main__':
