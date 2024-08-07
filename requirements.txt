@@ -12,7 +12,7 @@ qrcode
 #requests
 #numpy
 pandas
-python-tabulate
+tabulate
 #wikipedia
 #streamlit
 #streamlit_chat
